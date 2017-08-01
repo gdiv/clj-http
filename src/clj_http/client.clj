@@ -386,6 +386,13 @@
       (assoc :orig-content-encoding (get-in resp [:headers "content-encoding"]))
       (dissoc-in [:headers "content-encoding"])))
 
+(defmethod decompress-body "br"
+  [resp]
+  (-> resp
+      (update :body util/unbrotli)
+      (assoc :orig-content-encoding (get-in resp [:headers "content-encoding"]))
+      (dissoc-in [:headers "content-encoding"])))
+
 (defmethod decompress-body :default [resp]
   (assoc resp
          :orig-content-encoding
@@ -398,7 +405,7 @@
     req
     (assoc-in req
               [:headers "Accept-Encoding"]
-              "gzip, deflate")))
+              "gzip, deflate, br")))
 
 (defn- decompression-response
   [req resp]

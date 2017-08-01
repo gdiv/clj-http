@@ -7,6 +7,7 @@
   :global-vars {*warn-on-reflection* false}
   :min-lein-version "2.0.0"
   :exclusions [org.clojure/clojure]
+  :repositories [["jbrotli" "https://dl.bintray.com/nitram509/jbrotli"]]
   :dependencies [[org.apache.httpcomponents/httpcore "4.4.6"]
                  [org.apache.httpcomponents/httpclient "4.5.3"]
                  [org.apache.httpcomponents/httpasyncclient "4.1.3"]
@@ -14,7 +15,8 @@
                  [commons-codec "1.10"]
                  [commons-io "2.5"]
                  [slingshot "0.12.2"]
-                 [potemkin "0.4.3"]]
+                 [potemkin "0.4.3"]
+                 [org.meteogroup.jbrotli/jbrotli "0.5.0"]]
   :profiles {:dev {:dependencies [;; optional deps
                                   [cheshire "5.7.1"]
                                   [crouton "0.1.2"]

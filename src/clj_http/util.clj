@@ -10,7 +10,8 @@
                     ByteArrayOutputStream)
            (java.net URLEncoder URLDecoder)
            (java.util.zip InflaterInputStream DeflaterInputStream
-                          GZIPInputStream GZIPOutputStream)))
+                          GZIPInputStream GZIPOutputStream)
+           (org.meteogroup.jbrotli.io BrotliInputStream)))
 
 (defn utf8-bytes
   "Returns the encoding's bytes corresponding to the given string. If no
@@ -92,6 +93,18 @@
   [b]
   (when b
     (IOUtils/toByteArray (DeflaterInputStream. (ByteArrayInputStream. b)))))
+
+(defn unbrotli
+  "Returns a unbrotli'd version of the given byte array / input stream."
+  [b]
+  (when b
+    (cond
+      (instance? java.io.InputStream b)
+      (BrotliInputStream. b)
+
+      :else
+      (IOUtils/toByteArray (BrotliInputStream.
+                            (ByteArrayInputStream. b))))))
 
 (defn lower-case-keys
   "Recursively lower-case all map keys that are strings."
