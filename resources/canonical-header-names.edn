@@ -303,4 +303,6 @@
  "set-cookie2" "Set-Cookie2",
  "mt-priority" "MT-Priority",
  "generate-delivery-report" "Generate-Delivery-Report",
- "mmhs-originator-plad" "MMHS-Originator-PLAD"}
+ "mmhs-originator-plad" "MMHS-Originator-PLAD"
+ "dnt" "DNT"
+ "upgrade-insecure-requests" "Upgrade-Insecure-Requests"}
