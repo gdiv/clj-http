@@ -8,25 +8,15 @@
            (org.eclipse.jetty.server Request Server)
            (org.eclipse.jetty.server.handler AbstractHandler)))
 
-(deftest test-special-case
-  (are [expected given]
-    (is (= expected (special-case given)))
-    nil nil
-    "" ""
-    "foo" "foo"
-    "DNT" "dnt"
-    "P3P" "P3P"
-    "Content-MD5" "content-md5"))
-
 (deftest test-canonicalize
   (are [expected given]
     (is (= expected (canonicalize given)))
     nil nil
     "" ""
     "Date" :date
-    "Date" :DATE
-    "Foo-Bar-Baz" :foo-bar-baz
-    "Content-MD5" :content-md5))
+    "Accept-Encoding" :accept-encoding
+    "Content-MD5" :content-md5
+    "foo-bar-baz" :foo-bar-baz))
 
 (deftest test-normalize
   (are [expected given]
@@ -47,8 +37,8 @@
   (is (= {:foo ["1" "2" "3"]} (assoc-join {:foo ["1" "2"]} :foo "3"))))
 
 (deftest test-header-map
-  (let [m (header-map :foo "bar" "baz" "quux")
-        m2 (assoc m :ham "eggs")]
+  (let [m (header-map :Foo "bar" "baz" "quux")
+        m2 (assoc m :Ham "eggs")]
     (is (= "bar"
            (:foo m)
            (:FOO m)

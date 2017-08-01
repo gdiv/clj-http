@@ -7,30 +7,13 @@
   HTTP representation (e.g. :accept-encoding will become
   \"Accept-Encoding\")."
   (:require [clojure.string :as s]
-            [potemkin :as potemkin])
+            [potemkin :as potemkin]
+            [clj-http.util :refer [def-edn-constant]])
   (:import (java.util Locale)
            (org.apache.http Header HeaderIterator)))
 
-(def special-cases
-  "A collection of HTTP headers that do not follow the normal
-  Looks-Like-This casing."
-  ["Content-MD5"
-   "DNT"
-   "ETag"
-   "P3P"
-   "TE"
-   "WWW-Authenticate"
-   "X-ATT-DeviceId"
-   "X-UA-Compatible"
-   "X-WebKit-CSP"
-   "X-XSS-Protection"])
-
-(defn special-case
-  "Returns the special-case capitalized version of a string if that
-  string is a special case, otherwise returns the string unchanged."
-  [^String s]
-  (or (first (filter #(.equalsIgnoreCase ^String % s) special-cases))
-      s))
+(def-edn-constant canonical-header-names
+  "canonical-header-names.edn")
 
 (defn ^String lower-case
   "Converts a string to all lower-case, using the root locale.
@@ -42,33 +25,12 @@
   (when s
     (.toLowerCase (.toString s) Locale/ROOT)))
 
-(defn title-case
-  "Converts a character to titlecase."
-  [^Character c]
-  (when c
-    (Character/toTitleCase c)))
-
 (defn canonicalize
-  "Transforms a keyword header name into its canonical string
-  representation.
-
-  The canonical string representation is title-cased words separated
-  by dashes, like so: :date -> \"Date\", :DATE -> \"Date\", and
-  :foo-bar -> \"Foo-Bar\".
-
-  However, there is special-casing for some common headers, so: :p3p
-  -> \"P3P\", and :content-md5 -> \"Content-MD5\"."
-  [k]
-  (when k
-    (-> (name k)
-        (lower-case)
-        (s/replace #"(?:^.|-.)"
-                   (fn [s]
-                     (if (next s)
-                       (str (first s)
-                            (title-case (second s)))
-                       (str (title-case (first s))))))
-        (special-case))))
+  "Transforms a lower-case header name into its canonical string
+  representation. Leave non-lowercase header names as is."
+  [header-name]
+  (when-let [k (and header-name (name header-name))]
+    (get canonical-header-names k k)))
 
 (defn normalize
   "Turns a string or keyword into normalized form, which is a

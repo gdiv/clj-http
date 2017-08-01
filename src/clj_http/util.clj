@@ -1,7 +1,9 @@
 (ns clj-http.util
   "Helper functions for the HTTP client."
   (:require [clojure.string :refer [blank? lower-case split trim]]
-            [clojure.walk :refer [postwalk]])
+            [clojure.walk :refer [postwalk]]
+            [clojure.java.io :as io]
+            [clojure.edn :as edn])
   (:import (org.apache.commons.codec.binary Base64)
            (org.apache.commons.io IOUtils)
            (java.io BufferedInputStream ByteArrayInputStream
@@ -125,3 +127,15 @@
           (map #(split % #"="))
           (mapcat (fn [[k v]] [(keyword (lower-case k)) (trim v)]))
           (apply hash-map))}))
+
+(defn slurp-edn-resource
+  [resource-name]
+  (-> resource-name
+      io/resource
+      slurp
+      edn/read-string))
+
+(defmacro def-edn-constant
+  [name resource-name]
+  `(def ~name
+     ~(slurp-edn-resource resource-name)))
