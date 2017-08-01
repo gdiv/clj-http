@@ -564,7 +564,7 @@
 (deftest apply-on-compressed
   (let [client (fn [req]
                  (is (= "gzip, deflate"
-                        (get-in req [:headers "accept-encoding"])))
+                        (get-in req [:headers "Accept-Encoding"])))
                  {:body (util/gzip (util/utf8-bytes "foofoofoo"))
                   :headers {"content-encoding" "gzip"}})
         c-client (client/wrap-decompression client)
@@ -576,7 +576,7 @@
 (deftest apply-on-compressed-async
   (let [client (fn [req respond raise]
                  (is (= "gzip, deflate"
-                        (get-in req [:headers "accept-encoding"])))
+                        (get-in req [:headers "Accept-Encoding"])))
                  (respond {:body (util/gzip (util/utf8-bytes "foofoofoo"))
                            :headers {"content-encoding" "gzip"}}))
         c-client (client/wrap-decompression client)
@@ -590,7 +590,7 @@
 (deftest apply-on-deflated
   (let [client (fn [req]
                  (is (= "gzip, deflate"
-                        (get-in req [:headers "accept-encoding"])))
+                        (get-in req [:headers "Accept-Encoding"])))
                  {:body (util/deflate (util/utf8-bytes "barbarbar"))
                   :headers {"content-encoding" "deflate"}})
         c-client (client/wrap-decompression client)
@@ -603,7 +603,7 @@
 (deftest apply-on-deflated-async
   (let [client (fn [req respond raise]
                  (is (= "gzip, deflate"
-                        (get-in req [:headers "accept-encoding"])))
+                        (get-in req [:headers "Accept-Encoding"])))
                  (respond {:body (util/deflate (util/utf8-bytes "barbarbar"))
                            :headers {"content-encoding" "deflate"}}))
         c-client (client/wrap-decompression client)
@@ -632,7 +632,7 @@
 (deftest t-weird-non-known-compression
   (let [client (fn [req]
                  (is (= "gzip, deflate"
-                        (get-in req [:headers "accept-encoding"])))
+                        (get-in req [:headers "Accept-Encoding"])))
                  {:body (util/utf8-bytes "foofoofoo")
                   :headers {"content-encoding" "pig-latin"}})
         c-client (client/wrap-decompression client)
@@ -649,24 +649,24 @@
 (deftest apply-on-accept
   (is-applied client/wrap-accept
               {:accept :json}
-              {:headers {"accept" "application/json"}})
+              {:headers {"Accept" "application/json"}})
   (is-applied client/wrap-accept
               {:accept :transit+json}
-              {:headers {"accept" "application/transit+json"}})
+              {:headers {"Accept" "application/transit+json"}})
   (is-applied client/wrap-accept
               {:accept :transit+msgpack}
-              {:headers {"accept" "application/transit+msgpack"}}))
+              {:headers {"Accept" "application/transit+msgpack"}}))
 
 (deftest apply-on-accept-async
   (is-applied-async client/wrap-accept
                     {:accept :json}
-                    {:headers {"accept" "application/json"}})
+                    {:headers {"Accept" "application/json"}})
   (is-applied-async client/wrap-accept
                     {:accept :transit+json}
-                    {:headers {"accept" "application/transit+json"}})
+                    {:headers {"Accept" "application/transit+json"}})
   (is-applied-async client/wrap-accept
                     {:accept :transit+msgpack}
-                    {:headers {"accept" "application/transit+msgpack"}}))
+                    {:headers {"Accept" "application/transit+msgpack"}}))
 
 (deftest pass-on-no-accept
   (is-passed client/wrap-accept
@@ -679,26 +679,26 @@
 (deftest apply-on-accept-encoding
   (is-applied client/wrap-accept-encoding
               {:accept-encoding [:identity :gzip]}
-              {:headers {"accept-encoding" "identity, gzip"}}))
+              {:headers {"Accept-Encoding" "identity, gzip"}}))
 
 (deftest apply-custom-accept-encoding
   (testing "no custom encodings to accept"
     (is-applied (comp client/wrap-accept-encoding
                       client/wrap-decompression)
                 {}
-                {:headers {"accept-encoding" "gzip, deflate"}
+                {:headers {"Accept-Encoding" "gzip, deflate"}
                  :orig-content-encoding nil}))
   (testing "accept some custom encodings, but still include gzip and deflate"
     (is-applied (comp client/wrap-accept-encoding
                       client/wrap-decompression)
                 {:accept-encoding [:foo :bar]}
-                {:headers {"accept-encoding" "foo, bar, gzip, deflate"}
+                {:headers {"Accept-Encoding" "foo, bar"}
                  :orig-content-encoding nil}))
   (testing "accept some custom encodings, but exclude gzip and deflate"
     (is-applied (comp client/wrap-accept-encoding
                       client/wrap-decompression)
                 {:accept-encoding [:foo :bar] :decompress-body false}
-                {:headers {"accept-encoding" "foo, bar"}
+                {:headers {"Accept-Encoding" "foo, bar"}
                  :decompress-body false})))
 
 (deftest pass-on-no-accept-encoding
@@ -797,37 +797,37 @@
 (deftest apply-on-content-type
   (is-applied client/wrap-content-type
               {:content-type :json}
-              {:headers {"content-type" "application/json"}
+              {:headers {"Content-Type" "application/json"}
                :content-type :json})
   (is-applied client/wrap-content-type
               {:content-type :json :character-encoding "UTF-8"}
-              {:headers {"content-type" "application/json; charset=UTF-8"}
+              {:headers {"Content-Type" "application/json; charset=UTF-8"}
                :content-type :json :character-encoding "UTF-8"})
   (is-applied client/wrap-content-type
               {:content-type :transit+json}
-              {:headers {"content-type" "application/transit+json"}
+              {:headers {"Content-Type" "application/transit+json"}
                :content-type :transit+json})
   (is-applied client/wrap-content-type
               {:content-type :transit+msgpack}
-              {:headers {"content-type" "application/transit+msgpack"}
+              {:headers {"Content-Type" "application/transit+msgpack"}
                :content-type :transit+msgpack}))
 
 (deftest apply-on-content-type-async
   (is-applied-async client/wrap-content-type
                     {:content-type :json}
-                    {:headers {"content-type" "application/json"}
+                    {:headers {"Content-Type" "application/json"}
                      :content-type :json})
   (is-applied-async client/wrap-content-type
                     {:content-type :json :character-encoding "UTF-8"}
-                    {:headers {"content-type" "application/json; charset=UTF-8"}
+                    {:headers {"Content-Type" "application/json; charset=UTF-8"}
                      :content-type :json :character-encoding "UTF-8"})
   (is-applied-async client/wrap-content-type
                     {:content-type :transit+json}
-                    {:headers {"content-type" "application/transit+json"}
+                    {:headers {"Content-Type" "application/transit+json"}
                      :content-type :transit+json})
   (is-applied-async client/wrap-content-type
                     {:content-type :transit+msgpack}
-                    {:headers {"content-type" "application/transit+msgpack"}
+                    {:headers {"Content-Type" "application/transit+msgpack"}
                      :content-type :transit+msgpack}))
 
 (deftest pass-on-no-content-type
@@ -859,13 +859,13 @@
 (deftest apply-on-basic-auth
   (is-applied client/wrap-basic-auth
               {:basic-auth ["Aladdin" "open sesame"]}
-              {:headers {"authorization"
+              {:headers {"Authorization"
                          "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="}}))
 
 (deftest apply-on-basic-auth-async
   (is-applied-async client/wrap-basic-auth
                     {:basic-auth ["Aladdin" "open sesame"]}
-                    {:headers {"authorization"
+                    {:headers {"Authorization"
                                "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="}}))
 
 (deftest pass-on-no-basic-auth
@@ -875,13 +875,13 @@
 (deftest apply-on-oauth
   (is-applied client/wrap-oauth
               {:oauth-token "my-token"}
-              {:headers {"authorization"
+              {:headers {"Authorization"
                          "Bearer my-token"}}))
 
 (deftest apply-on-oauth-async
   (is-applied-async client/wrap-oauth
                     {:oauth-token "my-token"}
-                    {:headers {"authorization"
+                    {:headers {"Authorization"
                                "Bearer my-token"}}))
 
 (deftest pass-on-no-oauth
