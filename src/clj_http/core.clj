@@ -422,8 +422,8 @@
                        (if (string? body)
                          (StringEntity. ^String body "UTF-8")
                          (ByteArrayEntity. body))))))
-     (let [ordered-headers (select-keys full-headers header-order)
-           unordered-headers (apply dissoc full-headers header-order)]
+     (let [unordered-headers (apply dissoc full-headers header-order)
+           ordered-headers (apply dissoc full-headers (keys unordered-headers))]
        (add-headers http-req ordered-headers header-order)
        (add-headers http-req unordered-headers))
 
