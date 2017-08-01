@@ -26,11 +26,13 @@
     (.toLowerCase (.toString s) Locale/ROOT)))
 
 (defn canonicalize
-  "Transforms a lower-case header name into its canonical string
-  representation. Leave non-lowercase header names as is."
+  "Transforms a lower-case keyword header name into its canonical string
+  representation. Leave everything else as is."
   [header-name]
-  (when-let [k (and header-name (name header-name))]
-    (get canonical-header-names k k)))
+  (if (keyword? header-name)
+    (let [k (name header-name)]
+      (get canonical-header-names k k))
+    header-name))
 
 (defn normalize
   "Turns a string or keyword into normalized form, which is a
