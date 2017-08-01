@@ -405,7 +405,7 @@
     req
     (assoc-in req
               [:headers "Accept-Encoding"]
-              "gzip, deflate, br")))
+              "gzip, deflate")))
 
 (defn- decompression-response
   [req resp]
