@@ -106,11 +106,12 @@
   (get [_ k v]
        (second (get m (normalize k) [nil v])))
   (assoc [_ k v]
-         (HeaderMap. (assoc m (normalize k) [(if (keyword? k)
-                                               (canonicalize k)
-                                               k)
-                                             v])
-                     mta))
+         (let [norm-k (normalize k)
+               original-k (get-in m [norm-k 0] (if (keyword? k)
+                                                 (canonicalize k)
+                                                 k))]
+           (HeaderMap. (assoc m norm-k [original-k v])
+                       mta)))
   (dissoc [_ k]
           (HeaderMap. (dissoc m (normalize k)) mta))
   (keys [_]
