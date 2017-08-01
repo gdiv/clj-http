@@ -395,7 +395,7 @@
   [req]
   (if (false? (opt req :decompress-body))
     req
-    (update-in req [:headers "accept-encoding"]
+    (update-in req [:headers "Accept-Encoding"]
                #(str/join ", " (remove nil? [% "gzip, deflate"])))))
 
 (defn- decompression-response
@@ -695,7 +695,7 @@
           ct (if character-encoding
                (str ctv "; charset=" character-encoding)
                ctv)]
-      (update-in req [:headers] assoc "content-type" ct))
+      (update-in req [:headers] assoc "Content-Type" ct))
     req))
 
 (defn wrap-content-type
@@ -712,7 +712,7 @@
   [{:keys [accept] :as req}]
   (if accept
     (-> req (dissoc :accept)
-        (assoc-in [:headers "accept"]
+        (assoc-in [:headers "Accept"]
                   (content-type-value accept)))
     req))
 
@@ -733,7 +733,7 @@
   (if accept-encoding
     (-> req
         (dissoc :accept-encoding)
-        (assoc-in [:headers "accept-encoding"]
+        (assoc-in [:headers "Accept-Encoding"]
                   (accept-encoding-value accept-encoding)))
     req))
 
@@ -817,7 +817,7 @@
   [req]
   (if-let [basic-auth (:basic-auth req)]
     (-> req (dissoc :basic-auth)
-        (assoc-in [:headers "authorization"]
+        (assoc-in [:headers "Authorization"]
                   (basic-auth-value basic-auth)))
     req))
 
@@ -834,7 +834,7 @@
   [req]
   (if-let [oauth-token (:oauth-token req)]
     (-> req (dissoc :oauth-token)
-        (assoc-in [:headers "authorization"]
+        (assoc-in [:headers "Authorization"]
                   (str "Bearer " oauth-token)))
     req))
 
