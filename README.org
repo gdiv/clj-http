@@ -11,6 +11,7 @@
 :PROPERTIES:
 :CUSTOM_ID: h:aaf075ea-2f0e-4a45-871a-0f89c838fb4b
 :END:
+ - [[#about-this-fork][About this fork]]
  - [[#help-wanted][HELP WANTED]]
  - [[#introduction][Introduction]]
    - [[#overview][Overview]]
@@ -50,6 +51,64 @@
  - [[#tests][Tests]]
  - [[#testimonials][Testimonials]]
  - [[#license][License]]
+
+* About this fork
+
+The purpose of this fork is to make clj-http more suitable for general
+purpose web-scraping. When doing web scraping one often finds that
+although the HTTP spec allows for lowercase headers and any header
+order, yet servers often detect scrapers by examining the casing of
+the header names and their order.
+
+Clj-http did not have support for custom header orders before. This
+fork tries to give more control to the user of the library in this regard.
+
+** Fork Features
+
+- Support for any custom header & header order
+- Support for brotli encoding
+
+** Fork features usage
+
+The request below will imitate Firefox headers
+
+#+BEGIN_SRC clojure
+  (clj-http.client/get
+   "http://localhost:8888/"
+   {:headers {"User-Agent" "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:47.0) Gecko/20100101 Firefox/47.0"
+              "Accept-Encoding" "gzip, deflate"
+              "Accept" "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+              "Accept-Language" "en-US;q=0.5"
+              "DNT" "1"
+              "Connection" "keep-alive"
+              "Upgrade-Insecure-Requests" "1"}
+    :header-order ["Host"
+                   "User-Agent"
+                   "Accept"
+                   "Accept-Language"
+                   "Accept-Encoding"
+                   "Cookie"
+                   "DNT"
+                   "Connection"
+                   "Upgrade-Insecure-Requests"
+                   "Cache-Control"]})
+#+END_SRC
+
+** Fork changes ( potentially breaking )
+
+- A :header-order key can be passed to requests which must store the
+  header names in the order they need to be sent
+
+- The method for canonicalization have been changed to only
+  canonicalize lowercase keyword headers.
+
+- The wrap-decompression middleware previously have been augmented the
+  'Accept-Encoding' header with its own values. Now, when the
+  'Accept-Encoding' header is set on a request, the middleware does
+  not tamper with it. For the sake of compatibility, 'Accept-Encoding' is
+  still set by default when its not set by the user.
+
+- Every request header value set by clj-http is now in its canonical form.
 
 * HELP WANTED
 :PROPERTIES:
