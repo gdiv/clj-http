@@ -217,9 +217,6 @@
                     resp ctx)))))
     (.build builder)))
 
-(defn http-get []
-  (HttpGet. "https://www.google.com"))
-
 (defn make-proxy-method-with-body
   [method]
   (fn [url]
