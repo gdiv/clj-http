@@ -347,6 +347,16 @@
     (or conn/*connection-manager*
         (conn/make-regular-conn-manager req))))
 
+(defn add-headers
+  [http-req headers & [header-order]]
+  (doseq [header-n (or header-order
+                       (keys headers))]
+    (when-let [header-v (get headers header-n)]
+      (if (sequential? header-v)
+        (doseq [header-vth header-v]
+          (.addHeader http-req header-n header-vth))
+        (.addHeader http-req header-n (str header-v))))))
+
 (defn request
   ([req] (request req nil nil))
   ([{:keys [body conn-timeout conn-request-timeout connection-manager
@@ -355,24 +365,32 @@
             request-method scheme server-name server-port socket-timeout
             uri response-interceptor proxy-host proxy-port async?
             http-client-context http-request-config
-            proxy-ignore-hosts proxy-user proxy-pass digest-auth ntlm-auth]
+            proxy-ignore-hosts proxy-user proxy-pass digest-auth ntlm-auth
+            header-order]
      :as req} respond raise]
    (let [req (dissoc req :async?)
          scheme (name scheme)
-         http-url (str scheme "://" server-name
-                       (when server-port (str ":" server-port))
+         http-host (str server-name
+                        (when server-port (str ":" server-port)))
+         http-url (str scheme "://" http-host
                        uri
                        (when query-string (str "?" query-string)))
          conn-mgr (or connection-manager
                       (get-conn-mgr async? req))
          proxy-ignore-hosts (or proxy-ignore-hosts
                                 #{"localhost" "127.0.0.1"})
+
+         full-headers (merge headers
+                             (when-not (or (conn/reusable? conn-mgr)
+                                           (get headers "Connection"))
+                               {"Connection" "close"})
+                             {"Host" http-host})
+
          ^RequestConfig request-config (or http-request-config (request-config req))
          ^HttpClientContext context (http-context request-config http-client-context)
          ^HttpUriRequest http-req (http-request-for
                                    request-method http-url body)]
-     (when-not (conn/reusable? conn-mgr)
-       (.addHeader http-req "Connection" "close"))
+
      (when-let [cookie-jar (or cookie-store *cookie-store*)]
        (.setCookieStore context cookie-jar))
      (when-let [[user pass] digest-auth]
@@ -404,11 +422,11 @@
                        (if (string? body)
                          (StringEntity. ^String body "UTF-8")
                          (ByteArrayEntity. body))))))
-     (doseq [[header-n header-v] headers]
-       (if (coll? header-v)
-         (doseq [header-vth header-v]
-           (.addHeader http-req header-n header-vth))
-         (.addHeader http-req header-n (str header-v))))
+     (let [ordered-headers (select-keys full-headers header-order)
+           unordered-headers (apply dissoc full-headers header-order)]
+       (add-headers http-req ordered-headers header-order)
+       (add-headers http-req unordered-headers))
+
      (when (opt req :debug) (print-debug! req http-req))
      (if-not async?
        (let [^CloseableHttpClient
