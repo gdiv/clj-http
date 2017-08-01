@@ -1099,7 +1099,6 @@
   "The default list of middleware clj-http uses for wrapping requests."
   [wrap-request-timing
    wrap-async-pooling
-   wrap-header-map
    wrap-query-params
    wrap-basic-auth
    wrap-oauth
@@ -1107,9 +1106,9 @@
    wrap-url
    wrap-decompression
    wrap-input-coercion
+   wrap-additional-header-parsing
    ;; put this before output-coercion, so additional charset
    ;; headers can be used if desired
-   wrap-additional-header-parsing
    wrap-output-coercion
    wrap-exceptions
    wrap-accept
@@ -1120,7 +1119,8 @@
    wrap-method
    wrap-cookies
    wrap-links
-   wrap-unknown-host])
+   wrap-unknown-host
+   wrap-header-map])
 
 (def ^:dynamic
   *current-middleware*
